@@ -73,6 +73,7 @@ abstract class TimelineViewModel(
         private set
     var tags: List<String> = emptyList()
         private set
+    private var isStreamingEnabled = false
 
     protected var alwaysShowSensitiveMedia = false
     private var alwaysOpenSpoilers = false
@@ -97,7 +98,7 @@ abstract class TimelineViewModel(
         }
     }
 
-    var isFirstOfStreaming = false
+    var currentStreamId: Int = 0
     val subscription by lazy {
         when (kind) {
             Kind.HOME -> Subscription(StreamType.USER)
@@ -115,16 +116,17 @@ abstract class TimelineViewModel(
             }
         }
     }
-    var isStreamingEnabled = false
 
     fun init(
         kind: Kind,
         id: String?,
         tags: List<String>,
+        isStreamingEnabled: Boolean,
     ) {
         this.kind = kind
         this.id = id
         this.tags = tags
+        this.isStreamingEnabled = isStreamingEnabled
         filterModel.kind = kind.toFilterKind()
 
         if (kind == Kind.HOME) {
@@ -219,7 +221,7 @@ abstract class TimelineViewModel(
 
     abstract fun handlePinEvent(pinEvent: PinEvent)
 
-    abstract fun handleStreamUpdateEvent(status: Status)
+    abstract fun handleStreamUpdateEvent(status: Status, streamId: Int)
 
     abstract fun fullReload()
 
@@ -286,7 +288,7 @@ abstract class TimelineViewModel(
             is PinEvent -> handlePinEvent(event)
             is StreamUpdateEvent -> {
                 if (isStreamingEnabled && event.subscription == subscription) {
-                    handleStreamUpdateEvent(event.status)
+                    handleStreamUpdateEvent(event.status, event.streamId)
                 }
             }
             is MuteConversationEvent -> fullReload()

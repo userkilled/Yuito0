@@ -15,11 +15,6 @@
         android:title="@string/action_tab_edit_list"
         android:visible="false" />
 
-    <item android:id="@+id/tabToggleStreaming"
-        android:icon="@drawable/ic_check_24dp"
-        android:title="@string/action_tab_toggle_streaming"
-        android:visible="false" />
-
     <item android:id="@+id/tabToggleNotificationsFilter"
         android:icon="@drawable/ic_notifications_24dp"
         android:title="@string/action_tab_toggle_notifications_filter"

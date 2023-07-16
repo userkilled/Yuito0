@@ -283,15 +283,15 @@ class CachedTimelineViewModel @Inject constructor(
         // handled by CacheUpdater
     }
 
-    override fun handleStreamUpdateEvent(status: Status) {
+    override fun handleStreamUpdateEvent(status: Status, streamId: Int) {
         viewModelScope.launch {
             val timelineDao = db.timelineDao()
             val activeAccount = accountManager.activeAccount!!
 
             db.withTransaction {
-                if (isFirstOfStreaming) {
+                if (streamId != currentStreamId) {
                     timelineDao.insertStatus(Placeholder(status.id, loading = false).toEntity(activeAccount.id))
-                    isFirstOfStreaming = false
+                    currentStreamId = streamId
                     return@withTransaction
                 }
 

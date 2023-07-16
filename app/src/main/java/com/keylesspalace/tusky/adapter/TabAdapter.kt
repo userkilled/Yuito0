@@ -18,12 +18,16 @@ package com.keylesspalace.tusky.adapter
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewGroup
+import android.widget.CompoundButton.OnCheckedChangeListener
 import androidx.core.view.size
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.chip.Chip
+import com.keylesspalace.tusky.FEDERATED
 import com.keylesspalace.tusky.HASHTAG
+import com.keylesspalace.tusky.HOME
 import com.keylesspalace.tusky.LIST
+import com.keylesspalace.tusky.LOCAL
 import com.keylesspalace.tusky.R
 import com.keylesspalace.tusky.TabData
 import com.keylesspalace.tusky.databinding.ItemTabPreferenceBinding
@@ -40,6 +44,7 @@ interface ItemInteractionListener {
     fun onStartDrag(viewHolder: RecyclerView.ViewHolder)
     fun onActionChipClicked(tab: TabData, tabPosition: Int)
     fun onChipClicked(tab: TabData, tabPosition: Int, chipPosition: Int)
+    fun onStreamingChanged(tab: TabData, tabPosition: Int, enabled: Boolean)
 }
 
 class TabAdapter(
@@ -145,6 +150,18 @@ class TabAdapter(
                 }
             } else {
                 binding.chipGroup.hide()
+            }
+
+            if (tab.id in arrayOf(HOME, LOCAL, FEDERATED, LIST)) {
+                binding.switchStreaming.show()
+
+                binding.switchStreaming.isChecked = tab.enableStreaming
+                binding.switchStreaming.setOnCheckedChangeListener { _, isChecked ->
+                    listener.onStreamingChanged(tab, holder.bindingAdapterPosition, isChecked)
+                    binding.switchStreaming.setOnCheckedChangeListener(null)
+                }
+            } else {
+                binding.switchStreaming.hide()
             }
         }
     }

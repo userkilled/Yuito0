@@ -212,6 +212,14 @@ class TabPreferenceActivity : BaseActivity(), Injectable, ItemInteractionListene
         currentTabsAdapter.notifyItemChanged(tabPosition)
     }
 
+    override fun onStreamingChanged(tab: TabData, tabPosition: Int, enabled: Boolean) {
+        val newTab = tab.copy(enableStreaming = enabled)
+        currentTabs[tabPosition] = newTab
+        saveTabs()
+
+        currentTabsAdapter.notifyItemChanged(tabPosition)
+    }
+
     private fun toggleFab(expand: Boolean) {
         val transition = MaterialContainerTransform().apply {
             startView = if (expand) binding.actionButton else binding.sheet

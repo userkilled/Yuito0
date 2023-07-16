@@ -243,13 +243,13 @@ class NetworkTimelineViewModel @Inject constructor(
         }
     }
 
-    override fun handleStreamUpdateEvent(status: Status) {
+    override fun handleStreamUpdateEvent(status: Status, streamId: Int) {
         viewModelScope.launch {
             val activeAccount = accountManager.activeAccount!!
 
-            if (isFirstOfStreaming) {
+            if (streamId != currentStreamId) {
                 statusData.add(0, StatusViewData.Placeholder(status.id, isLoading = false))
-                isFirstOfStreaming = false
+                currentStreamId = streamId
             } else {
                 statusData.add(
                     0,

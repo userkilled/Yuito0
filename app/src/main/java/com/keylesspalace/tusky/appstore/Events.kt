@@ -25,4 +25,4 @@ data class DomainMuteEvent(val instance: String) : Event
 data class AnnouncementReadEvent(val announcementId: String) : Event
 data class PinEvent(val statusId: String, val pinned: Boolean) : Event
 data class QuickReplyEvent(val status: Status) : Event
-data class StreamUpdateEvent(val status: Status, val subscription: Subscription) : Event
+data class StreamUpdateEvent(val status: Status, val subscription: Subscription, val streamId: Int) : Event

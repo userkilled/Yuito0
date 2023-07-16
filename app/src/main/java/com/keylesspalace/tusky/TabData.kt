@@ -24,6 +24,8 @@ import com.keylesspalace.tusky.components.notifications.NotificationsFragment
 import com.keylesspalace.tusky.components.timeline.TimelineFragment
 import com.keylesspalace.tusky.components.timeline.viewmodel.TimelineViewModel
 import com.keylesspalace.tusky.components.trending.TrendingFragment
+import net.accelf.yuito.streaming.StreamType
+import net.accelf.yuito.streaming.Subscription
 import java.util.Objects
 
 /** this would be a good case for a sealed class, but that does not work nice with Room */
@@ -48,6 +50,20 @@ data class TabData(
     val title: (Context) -> String = { context -> context.getString(text) },
     val enableStreaming: Boolean = false,
 ) {
+    val subscription by lazy {
+        if (enableStreaming) {
+            when (id) {
+                HOME -> Subscription(StreamType.USER)
+                LOCAL -> Subscription(StreamType.LOCAL)
+                FEDERATED -> Subscription(StreamType.PUBLIC)
+                LIST -> Subscription(StreamType.LIST, arguments[0].toInt())
+                else -> null
+            }
+        } else {
+            null
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

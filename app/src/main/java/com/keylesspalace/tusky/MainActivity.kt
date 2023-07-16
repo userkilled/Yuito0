@@ -301,14 +301,6 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, HasAndroidInje
 
         fetchAnnouncements()
 
-        streamingManager.setup(lifecycleScope.coroutineContext.job) { active ->
-            if (active) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            } else {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            }
-        }
-
         // Initialise the tab adapter and set to viewpager. Fragments appear to be leaked if the
         // adapter changes over the life of the viewPager (the adapter, not its contents), so set
         // the initial list of tabs to empty, and set the full list later in setupTabs(). See
@@ -732,15 +724,6 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, HasAndroidInje
         super.onSaveInstanceState(binding.mainDrawer.saveInstanceState(outState))
     }
 
-    private fun tintCheckIcon(item: MenuItem) {
-        if (item.isChecked) {
-            @Suppress("DEPRECATION")
-            item.icon?.setColorFilter(ContextCompat.getColor(this, R.color.tusky_green_light), PorterDuff.Mode.SRC_IN)
-        } else {
-            setDrawableTint(this, item.icon!!, android.R.attr.textColorTertiary)
-        }
-    }
-
     private fun setupTabs(selectNotificationTab: Boolean) {
         val activeTabLayout = if (preferences.getString(PrefKeys.MAIN_NAV_POSITION, "top") == "bottom") {
             val actionBarSize = getDimension(this, androidx.appcompat.R.attr.actionBarSize)
@@ -794,12 +777,6 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, HasAndroidInje
                 if (data.id == LIST) {
                     menuBuilder.findItem(R.id.tabEditList).isVisible = true
                 }
-                if (data.id in arrayOf(HOME, LOCAL, FEDERATED, LIST)) {
-                    menuBuilder.findItem(R.id.tabToggleStreaming).apply {
-                        isVisible = true
-                        isChecked = data.enableStreaming
-                    }
-                }
                 if (data.id == NOTIFICATIONS) {
                     menuBuilder.findItem(R.id.tabToggleNotificationsFilter).isVisible = true
                 }
@@ -813,7 +790,6 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, HasAndroidInje
                         setDrawableTint(this, item.icon!!, android.R.attr.textColorPrimary)
                     }
                 }
-                tintCheckIcon(menuBuilder.findItem(R.id.tabToggleStreaming))
             }
 
             popup.setOnMenuItemClickListener { item ->
@@ -836,20 +812,6 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, HasAndroidInje
                             data.arguments.getOrNull(0).orEmpty(),
                             data.arguments.getOrNull(1).orEmpty()
                         ).show(supportFragmentManager, null)
-                    }
-                    R.id.tabToggleStreaming -> {
-                        if (fragment is TimelineFragment) {
-                            val to = !item.isChecked
-                            fragment.setStreamingEnabled(to)
-                            item.isChecked = to
-                            tintCheckIcon(item)
-
-                            tabs[position] = data.copy(enableStreaming = to)
-                            accountManager.activeAccount?.let {
-                                it.tabPreferences = tabs
-                                accountManager.saveAccount(it)
-                            }
-                        }
                     }
                     R.id.tabToggleNotificationsFilter -> {
                         if (fragment is NotificationsFragment) {
@@ -915,6 +877,17 @@ class MainActivity : BottomSheetActivity(), ActionButtonActivity, HasAndroidInje
         }
 
         updateProfiles()
+
+        streamingManager.setup(
+            this,
+            tabs.mapNotNull { it.subscription }.toSet(),
+        ) { active ->
+            if (active) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+        }
     }
 
     private fun refreshComposeButtonState(adapter: MainPagerAdapter, tabPosition: Int) {

@@ -10,79 +10,36 @@ import com.keylesspalace.tusky.entity.Filter
 import com.keylesspalace.tusky.entity.Status
 import com.keylesspalace.tusky.network.MastodonApi
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import net.accelf.yuito.streaming.SubscribeRequest.RequestType.SUBSCRIBE
-import net.accelf.yuito.streaming.SubscribeRequest.RequestType.UNSUBSCRIBE
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import kotlin.coroutines.CoroutineContext
 
 class MastodonStream(
-    parent: Job,
+    coroutineScope: CoroutineScope,
     private val okHttpClient: OkHttpClient,
     private val gson: Gson,
     private val eventHub: EventHub,
-    private val onStatusChange: (Boolean) -> Unit,
-) : WebSocketListener(), CoroutineScope {
+) : WebSocketListener(), CoroutineScope by coroutineScope {
 
     private var webSocket: WebSocket? = null
-    private val subscribing = mutableSetOf<Subscription>()
 
-    private val job = SupervisorJob(parent).apply {
-        invokeOnCompletion {
-            webSocket?.let {
-                closeSocket()
-            }
-        }
-    }
-    override val coroutineContext: CoroutineContext
-        get() = job
-
-    fun subscribe(subscription: Subscription) {
-        if (!subscribing.add(subscription)) {
-            // already subscribed
-            return
-        }
-
-        if (webSocket == null) {
-            openSocket()
-        }
-
-        send(SubscribeRequest.fromSubscription(SUBSCRIBE, subscription))
-        Log.d(TAG, "Subscribed $subscription")
-    }
-
-    fun unsubscribe(subscription: Subscription) {
-        if (!subscribing.remove(subscription)) {
-            // already unsubscribed
-            return
-        }
-
-        if (subscribing.isEmpty()) {
-            closeSocket()
-            return
-        }
-
-        send(SubscribeRequest.fromSubscription(UNSUBSCRIBE, subscription))
-        Log.d(TAG, "Unsubscribed $subscription")
-    }
-
-    private fun openSocket() {
+    fun openSocket(subscriptions: Set<Subscription>) {
         val request = Request.Builder().url(STREAMING_URL).build()
         webSocket = okHttpClient.newWebSocket(request, this)
-        onStatusChange(true)
+        subscriptions.forEach {
+            send(SubscribeRequest.fromSubscription(SUBSCRIBE, it))
+            Log.d(TAG, "Subscribed $it")
+        }
     }
 
-    private fun closeSocket() {
+    fun closeSocket() {
         webSocket!!.close(1000, null)
         webSocket = null
-        onStatusChange(false)
     }
 
     private fun send(subscribeRequest: SubscribeRequest) {
@@ -100,7 +57,7 @@ class MastodonStream(
             StreamEvent.EventType.UPDATE -> {
                 val status = gson.fromJson(payload, Status::class.java)
                 launch {
-                    eventHub.dispatch(StreamUpdateEvent(status, Subscription.fromStreamList(event.stream)))
+                    eventHub.dispatch(StreamUpdateEvent(status, Subscription.fromStreamList(event.stream), this@MastodonStream.hashCode()))
                 }
             }
             StreamEvent.EventType.DELETE -> launch {

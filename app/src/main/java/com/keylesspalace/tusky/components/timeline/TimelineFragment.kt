@@ -82,7 +82,6 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import net.accelf.yuito.streaming.StreamingManager
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -102,9 +101,6 @@ class TimelineFragment :
 
     @Inject
     lateinit var eventHub: EventHub
-
-    @Inject
-    lateinit var streamingManager: StreamingManager
 
     private val viewModel: TimelineViewModel by unsafeLazy {
         if (kind == TimelineViewModel.Kind.HOME) {
@@ -180,10 +176,8 @@ class TimelineFragment :
             kind,
             id,
             tags,
+            arguments.getBoolean(ARG_ENABLE_STREAMING),
         )
-        if (arguments.getBoolean(ARG_ENABLE_STREAMING)) {
-            setStreamingEnabled(true)
-        }
 
         isSwipeToRefreshEnabled = arguments.getBoolean(ARG_ENABLE_SWIPE_TO_REFRESH, true)
 
@@ -426,23 +420,6 @@ class TimelineFragment :
         // CWs are expanded without animation, buttons animate itself, we don't need it basically
         (binding.recyclerView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         binding.recyclerView.adapter = adapter
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        viewModel.isFirstOfStreaming = true
-    }
-
-    fun setStreamingEnabled(to: Boolean) {
-        viewModel.isStreamingEnabled = to
-
-        if (to) {
-            streamingManager.subscribe(viewModel.subscription)
-            viewModel.isFirstOfStreaming = true
-        } else {
-            streamingManager.unsubscribe(viewModel.subscription)
-        }
     }
 
     override fun onRefresh() {

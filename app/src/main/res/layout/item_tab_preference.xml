@@ -59,7 +59,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toTopOf="@id/switchStreaming">
 
         <com.google.android.material.chip.Chip
             android:id="@+id/actionChip"
@@ -72,5 +72,16 @@
             app:chipSurfaceColor="@color/tusky_blue" />
 
     </com.google.android.material.chip.ChipGroup>
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switchStreaming"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        android:text="@string/action_tab_toggle_streaming"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="?attr/status_text_medium"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

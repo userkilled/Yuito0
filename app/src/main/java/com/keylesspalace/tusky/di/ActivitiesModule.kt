@@ -56,15 +56,12 @@ abstract class ActivitiesModule {
     @ContributesAndroidInjector
     abstract fun contributesBaseActivity(): BaseActivity
 
-    @ActivityScope
     @ContributesAndroidInjector(modules = [FragmentBuildersModule::class])
     abstract fun contributesMainActivity(): MainActivity
 
-    @ActivityScope
     @ContributesAndroidInjector(modules = [FragmentBuildersModule::class])
     abstract fun contributesAccountActivity(): AccountActivity
 
-    @ActivityScope
     @ContributesAndroidInjector(modules = [FragmentBuildersModule::class])
     abstract fun contributesListsActivity(): ListsActivity
 
@@ -74,19 +71,15 @@ abstract class ActivitiesModule {
     @ContributesAndroidInjector
     abstract fun contributesEditProfileActivity(): EditProfileActivity
 
-    @ActivityScope
     @ContributesAndroidInjector(modules = [FragmentBuildersModule::class])
     abstract fun contributesAccountListActivity(): AccountListActivity
 
-    @ActivityScope
     @ContributesAndroidInjector(modules = [FragmentBuildersModule::class])
     abstract fun contributesViewThreadActivity(): ViewThreadActivity
 
-    @ActivityScope
     @ContributesAndroidInjector(modules = [FragmentBuildersModule::class])
     abstract fun contributesStatusListActivity(): StatusListActivity
 
-    @ActivityScope
     @ContributesAndroidInjector(modules = [FragmentBuildersModule::class])
     abstract fun contributesSearchActivity(): SearchActivity
 
@@ -99,7 +92,6 @@ abstract class ActivitiesModule {
     @ContributesAndroidInjector
     abstract fun contributesLoginWebViewActivity(): LoginWebViewActivity
 
-    @ActivityScope
     @ContributesAndroidInjector(modules = [FragmentBuildersModule::class])
     abstract fun contributesPreferencesActivity(): PreferencesActivity
 
@@ -118,11 +110,9 @@ abstract class ActivitiesModule {
     @ContributesAndroidInjector
     abstract fun contributesFollowedTagsActivity(): FollowedTagsActivity
 
-    @ActivityScope
     @ContributesAndroidInjector(modules = [FragmentBuildersModule::class])
     abstract fun contributesReportActivity(): ReportActivity
 
-    @ActivityScope
     @ContributesAndroidInjector(modules = [FragmentBuildersModule::class])
     abstract fun contributesInstanceListActivity(): InstanceListActivity
 
@@ -138,7 +128,6 @@ abstract class ActivitiesModule {
     @ContributesAndroidInjector
     abstract fun contributesSplashActivity(): SplashActivity
 
-    @ActivityScope
     @ContributesAndroidInjector(modules = [FragmentBuildersModule::class])
     abstract fun contributesTrendingActivity(): TrendingActivity
 
