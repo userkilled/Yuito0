@@ -61,7 +61,6 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.IOException
 import javax.inject.Inject
 
 class ViewThreadFragment :
@@ -203,21 +202,7 @@ class ViewThreadFragment :
                         binding.recyclerView.hide()
                         binding.statusView.show()
 
-                        if (uiState.throwable is IOException) {
-                            binding.statusView.setup(
-                                R.drawable.elephant_offline,
-                                R.string.error_network
-                            ) {
-                                viewModel.retry(thisThreadsStatusId)
-                            }
-                        } else {
-                            binding.statusView.setup(
-                                R.drawable.elephant_error,
-                                R.string.error_generic
-                            ) {
-                                viewModel.retry(thisThreadsStatusId)
-                            }
-                        }
+                        binding.statusView.setup(uiState.throwable) { viewModel.retry(thisThreadsStatusId) }
                     }
                     is ThreadUiState.Success -> {
                         if (uiState.statusViewData.none { viewData -> viewData.isDetailed }) {

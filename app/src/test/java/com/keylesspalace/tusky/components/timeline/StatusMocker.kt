@@ -55,7 +55,7 @@ fun mockStatus(
     card = null,
     language = null,
     filtered = null,
-    quote = null,
+    quote = null
 )
 
 fun mockStatusViewData(

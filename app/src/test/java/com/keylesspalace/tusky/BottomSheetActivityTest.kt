@@ -92,7 +92,7 @@ class BottomSheetActivityTest {
         card = null,
         language = null,
         filtered = null,
-        quote = null,
+        quote = null
     )
     private val statusSingle = Single.just(SearchResult(emptyList(), listOf(status), emptyList()))
 

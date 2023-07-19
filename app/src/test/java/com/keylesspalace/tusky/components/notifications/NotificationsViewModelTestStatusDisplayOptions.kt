@@ -51,7 +51,7 @@ class NotificationsViewModelTestStatusDisplayOptions : NotificationsViewModelTes
         showStatsInline = false,
         showSensitiveMedia = true, // setting in NotificationsViewModelTestBase
         openSpoiler = true, // setting in NotificationsViewModelTestBase
-        quoteEnabled = false,
+        quoteEnabled = false
     )
 
     @Test

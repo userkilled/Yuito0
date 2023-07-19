@@ -342,7 +342,7 @@ class FilterV1Test {
                 card = null,
                 language = null,
                 filtered = null,
-                quote = null,
+                quote = null
             )
         }
     }
