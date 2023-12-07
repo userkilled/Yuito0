@@ -21,14 +21,11 @@ import at.connyduck.calladapter.networkresult.fold
 import at.connyduck.calladapter.networkresult.onFailure
 import at.connyduck.calladapter.networkresult.onSuccess
 import com.keylesspalace.tusky.appstore.BlockEvent
-import com.keylesspalace.tusky.appstore.BookmarkEvent
 import com.keylesspalace.tusky.appstore.EventHub
-import com.keylesspalace.tusky.appstore.FavoriteEvent
 import com.keylesspalace.tusky.appstore.MuteConversationEvent
 import com.keylesspalace.tusky.appstore.MuteEvent
-import com.keylesspalace.tusky.appstore.PinEvent
 import com.keylesspalace.tusky.appstore.PollVoteEvent
-import com.keylesspalace.tusky.appstore.ReblogEvent
+import com.keylesspalace.tusky.appstore.StatusChangedEvent
 import com.keylesspalace.tusky.appstore.StatusDeletedEvent
 import com.keylesspalace.tusky.entity.DeletedStatus
 import com.keylesspalace.tusky.entity.Poll
@@ -53,8 +50,14 @@ class TimelineCases @Inject constructor(
             mastodonApi.reblogStatus(statusId)
         } else {
             mastodonApi.unreblogStatus(statusId)
-        }.onSuccess {
-            eventHub.dispatch(ReblogEvent(statusId, reblog))
+        }.onSuccess { status ->
+            if (status.reblog != null) {
+                // when reblogging, the Mastodon Api does not return the reblogged status directly
+                // but the newly created status with reblog set to the reblogged status
+                eventHub.dispatch(StatusChangedEvent(status.reblog))
+            } else {
+                eventHub.dispatch(StatusChangedEvent(status))
+            }
         }
     }
 
@@ -63,8 +66,8 @@ class TimelineCases @Inject constructor(
             mastodonApi.favouriteStatus(statusId)
         } else {
             mastodonApi.unfavouriteStatus(statusId)
-        }.onSuccess {
-            eventHub.dispatch(FavoriteEvent(statusId, favourite))
+        }.onSuccess { status ->
+            eventHub.dispatch(StatusChangedEvent(status))
         }
     }
 
@@ -73,8 +76,8 @@ class TimelineCases @Inject constructor(
             mastodonApi.bookmarkStatus(statusId)
         } else {
             mastodonApi.unbookmarkStatus(statusId)
-        }.onSuccess {
-            eventHub.dispatch(BookmarkEvent(statusId, bookmark))
+        }.onSuccess { status ->
+            eventHub.dispatch(StatusChangedEvent(status))
         }
     }
 
@@ -85,6 +88,50 @@ class TimelineCases @Inject constructor(
             mastodonApi.unmuteConversation(statusId)
         }.onSuccess {
             eventHub.dispatch(MuteConversationEvent(statusId, mute))
+        }
+    }
+
+    fun reblogOld(statusId: String, reblog: Boolean): Single<Status> {
+        val call = if (reblog) {
+            mastodonApi.reblogStatusOld(statusId)
+        } else {
+            mastodonApi.unreblogStatusOld(statusId)
+        }
+        return call.doAfterSuccess { status ->
+            eventHub.dispatchOld(StatusChangedEvent(status))
+        }
+    }
+
+    fun favouriteOld(statusId: String, favourite: Boolean): Single<Status> {
+        val call = if (favourite) {
+            mastodonApi.favouriteStatusOld(statusId)
+        } else {
+            mastodonApi.unfavouriteStatusOld(statusId)
+        }
+        return call.doAfterSuccess { status ->
+            eventHub.dispatchOld(StatusChangedEvent(status))
+        }
+    }
+
+    fun bookmarkOld(statusId: String, bookmark: Boolean): Single<Status> {
+        val call = if (bookmark) {
+            mastodonApi.bookmarkStatusOld(statusId)
+        } else {
+            mastodonApi.unbookmarkStatusOld(statusId)
+        }
+        return call.doAfterSuccess { status ->
+            eventHub.dispatchOld(StatusChangedEvent(status))
+        }
+    }
+
+    fun muteConversationOld(statusId: String, mute: Boolean): Single<Status> {
+        val call = if (mute) {
+            mastodonApi.muteConversationOld(statusId)
+        } else {
+            mastodonApi.unmuteConversationOld(statusId)
+        }
+        return call.doAfterSuccess {
+            eventHub.dispatchOld(MuteConversationEvent(statusId, mute))
         }
     }
 
@@ -118,7 +165,7 @@ class TimelineCases @Inject constructor(
         } else {
             mastodonApi.unpinStatus(statusId)
         }.fold({ status ->
-            eventHub.dispatch(PinEvent(statusId, pin))
+            eventHub.dispatch(StatusChangedEvent(status))
             NetworkResult.success(status)
         }, { e ->
             Log.w(TAG, "Failed to change pin state", e)
@@ -133,6 +180,16 @@ class TimelineCases @Inject constructor(
 
         return mastodonApi.voteInPoll(pollId, choices).onSuccess { poll ->
             eventHub.dispatch(PollVoteEvent(statusId, poll))
+        }
+    }
+
+    fun voteInPollOld(statusId: String, pollId: String, choices: List<Int>): Single<Poll> {
+        if (choices.isEmpty()) {
+            return Single.error(IllegalStateException())
+        }
+
+        return mastodonApi.voteInPollOld(pollId, choices).doAfterSuccess {
+            eventHub.dispatchOld(PollVoteEvent(statusId, it))
         }
     }
 

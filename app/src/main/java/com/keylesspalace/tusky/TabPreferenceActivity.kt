@@ -164,18 +164,12 @@ class TabPreferenceActivity : BaseActivity(), Injectable, ItemInteractionListene
             toggleFab(false)
         }
 
-        binding.maxTabsInfo.text = resources.getQuantityString(R.plurals.max_tab_number_reached, MAX_TAB_COUNT, MAX_TAB_COUNT)
-
         updateAvailableTabs()
 
         onBackPressedDispatcher.addCallback(onFabDismissedCallback)
     }
 
     override fun onTabAdded(tab: TabData) {
-        if (currentTabs.size >= MAX_TAB_COUNT) {
-            return
-        }
-
         toggleFab(false)
 
         if (tab.id == HASHTAG) {
@@ -386,17 +380,23 @@ class TabPreferenceActivity : BaseActivity(), Injectable, ItemInteractionListene
         if (!currentTabs.contains(directMessagesTab)) {
             addableTabs.add(directMessagesTab)
         }
-        val trendingTab = createTabDataFromId(TRENDING)
-        if (!currentTabs.contains(trendingTab)) {
-            addableTabs.add(trendingTab)
+        val trendingTagsTab = createTabDataFromId(TRENDING_TAGS)
+        if (!currentTabs.contains(trendingTagsTab)) {
+            addableTabs.add(trendingTagsTab)
+        }
+        val bookmarksTab = createTabDataFromId(BOOKMARKS)
+        if (!currentTabs.contains(trendingTagsTab)) {
+            addableTabs.add(bookmarksTab)
+        }
+        val trendingStatusesTab = createTabDataFromId(TRENDING_STATUSES)
+        if (!currentTabs.contains(trendingStatusesTab)) {
+            addableTabs.add(trendingStatusesTab)
         }
 
         addableTabs.add(createTabDataFromId(HASHTAG))
         addableTabs.add(createTabDataFromId(LIST))
 
         addTabAdapter.updateData(addableTabs)
-
-        binding.maxTabsInfo.visible(addableTabs.size == 0 || currentTabs.size >= MAX_TAB_COUNT)
         currentTabsAdapter.setRemoveButtonVisible(currentTabs.size > MIN_TAB_COUNT)
     }
 
@@ -429,6 +429,5 @@ class TabPreferenceActivity : BaseActivity(), Injectable, ItemInteractionListene
 
     companion object {
         private const val MIN_TAB_COUNT = 2
-        private const val MAX_TAB_COUNT = 9
     }
 }

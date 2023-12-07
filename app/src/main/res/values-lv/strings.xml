@@ -130,7 +130,6 @@
     <string name="action_create_list">Izveidot sarakstu</string>
     <string name="action_rename_list">Pārsaukt sarakstu</string>
     <string name="action_delete_list">Dzēst sarakstu</string>
-    <string name="action_edit_list">Labot sarakstu</string>
     <string name="action_add_to_list">Pievienot kontu sarakstam</string>
     <string name="action_remove_from_list">Noņemt kontu no saraksta</string>
     <string name="action_edit_image">Labot attēlu</string>
@@ -261,7 +260,6 @@
     <string name="pref_title_http_proxy_server">HTTP starpniekserveris</string>
     <string name="pref_title_http_proxy_port_message">Portam būtu jābūt starp %d un %d</string>
     <string name="action_view_account_preferences">Konta iestatījumi</string>
-    <string name="url_domain_notifier">%s (🔗 %s)</string>
     <string name="mute_domain_warning">Vai tiešām vēlaties bloķēt visu %s\? Šī domēna saturs netiks rādīts ne publiskajās laika līnijās, ne paziņojumos. Jūsu sekotāji no šī domēna tiks noņemti.</string>
     <string name="send_post_notification_saved_content">Ieraksta kopija tika saglabāta tavos melnrakstos</string>
     <string name="restart_emoji">Lai pielietotu šīs izmaiņas, ir jāpārstartē Yuito</string>
@@ -426,7 +424,6 @@
     <string name="pref_title_show_self_username">Rādīt lietotājvārdu rīkjoslās</string>
     <string name="pref_title_confirm_reblogs">Pirms pastiprināšanas rādīt apstiprināšanas dialogu</string>
     <string name="failed_search">Meklēšana neizdevās</string>
-    <string name="pref_title_show_notifications_filter">Rādīt paziņojumu filtru</string>
     <string name="pref_title_enable_swipe_for_tabs">Iespējot vilkšanas žestu, lai pārslēgtos starp cilnēm</string>
     <string name="pref_title_hide_top_toolbar">Paslēpt augšējās rīkjoslas virsrakstu</string>
     <string name="pref_title_notification_filter_reports">iesniegts jauns ziņojums</string>
@@ -490,11 +487,6 @@
         <item quantity="zero"><b>%s</b> pastiprinājumi</item>
         <item quantity="one"><b>%s</b> pastiprinājums</item>
         <item quantity="other"><b>%s</b> pastiprinājumi</item>
-    </plurals>
-    <plurals name="max_tab_number_reached">
-        <item quantity="zero">sasniegts maksimālais ciļņu skaits %1$d</item>
-        <item quantity="one">sasniegts maksimālais ciļņu skaits %1$d</item>
-        <item quantity="other">sasniegts maksimālais ciļņu skaits %1$d</item>
     </plurals>
     <string name="title_favourites">Izlases</string>
     <string name="notification_favourite_format">%s pievienoja tavu ierakstu izlasei</string>
@@ -595,7 +587,6 @@
     <string name="label_filter_action">Filtra darbība</string>
     <string name="hint_filter_title">Mans filtrs</string>
     <string name="label_filter_title">Nosaukums</string>
-    <string name="hint_description">Apraksts</string>
     <string name="ui_success_accepted_follow_request">Sekošanas pieprasījums pieņemts</string>
     <string name="ui_success_rejected_follow_request">Sekošanas pieprasījums bloķēts</string>
     <string name="post_privacy_followers_only">Tikai sekotājiem</string>

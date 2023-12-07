@@ -4,17 +4,37 @@ import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
 import androidx.annotation.WorkerThread
+import com.keylesspalace.tusky.appstore.EventHub
+import com.keylesspalace.tusky.appstore.NewNotificationsEvent
 import com.keylesspalace.tusky.components.notifications.NotificationHelper.filterNotification
 import com.keylesspalace.tusky.db.AccountEntity
 import com.keylesspalace.tusky.db.AccountManager
 import com.keylesspalace.tusky.entity.Marker
 import com.keylesspalace.tusky.entity.Notification
 import com.keylesspalace.tusky.network.MastodonApi
+import com.keylesspalace.tusky.util.HttpHeaderLink
 import com.keylesspalace.tusky.util.isLessThan
 import kotlinx.coroutines.delay
 import javax.inject.Inject
 import kotlin.math.min
 import kotlin.time.Duration.Companion.milliseconds
+
+/** Models next/prev links from the "Links" header in an API response */
+data class Links(val next: String?, val prev: String?) {
+    companion object {
+        fun from(linkHeader: String?): Links {
+            val links = HttpHeaderLink.parse(linkHeader)
+            return Links(
+                next = HttpHeaderLink.findByRelationType(links, "next")?.uri?.getQueryParameter(
+                    "max_id"
+                ),
+                prev = HttpHeaderLink.findByRelationType(links, "prev")?.uri?.getQueryParameter(
+                    "min_id"
+                )
+            )
+        }
+    }
+}
 
 /**
  * Fetch Mastodon notifications and show Android notifications, with summaries, for them.
@@ -28,7 +48,8 @@ import kotlin.time.Duration.Companion.milliseconds
 class NotificationFetcher @Inject constructor(
     private val mastodonApi: MastodonApi,
     private val accountManager: AccountManager,
-    private val context: Context
+    private val context: Context,
+    private val eventHub: EventHub
 ) {
     suspend fun fetchAndShow() {
         for (account in accountManager.getAllAccountsOrderedByActive()) {
@@ -41,6 +62,10 @@ class NotificationFetcher @Inject constructor(
                         .filter { filterNotification(notificationManager, account, it) }
                         .sortedWith(compareBy({ it.id.length }, { it.id })) // oldest notifications first
                         .toMutableList()
+
+                    // TODO do this before filter above? But one could argue that (for example) a tab badge is also a notification
+                    //   (and should therefore adhere to the notification config).
+                    eventHub.dispatch(NewNotificationsEvent(account.accountId, notifications))
 
                     // There's a maximum limit on the number of notifications an Android app
                     // can display. If the total number of notifications (current notifications,
@@ -65,23 +90,29 @@ class NotificationFetcher @Inject constructor(
                         }
                     }
 
+                    val notificationsByType = notifications.groupBy { it.type }
+
                     // Make and send the new notifications
                     // TODO: Use the batch notification API available in NotificationManagerCompat
                     // 1.11 and up (https://developer.android.com/jetpack/androidx/releases/core#1.11.0-alpha01)
                     // when it is released.
-                    notifications.forEachIndexed { index, notification ->
-                        val androidNotification = NotificationHelper.make(
-                            context,
-                            notificationManager,
-                            notification,
-                            account,
-                            index == 0
-                        )
-                        notificationManager.notify(notification.id, account.id.toInt(), androidNotification)
-                        // Android will rate limit / drop notifications if they're posted too
-                        // quickly. There is no indication to the user that this happened.
-                        // See https://github.com/tuskyapp/Tusky/pull/3626#discussion_r1192963664
-                        delay(1000.milliseconds)
+
+                    notificationsByType.forEach { notificationsGroup ->
+                        notificationsGroup.value.forEach { notification ->
+                            val androidNotification = NotificationHelper.make(
+                                context,
+                                notificationManager,
+                                notification,
+                                account,
+                                notificationsGroup.value.size == 1
+                            )
+                            notificationManager.notify(notification.id, account.id.toInt(), androidNotification)
+
+                            // Android will rate limit / drop notifications if they're posted too
+                            // quickly. There is no indication to the user that this happened.
+                            // See https://github.com/tuskyapp/Tusky/pull/3626#discussion_r1192963664
+                            delay(1000.milliseconds)
+                        }
                     }
 
                     NotificationHelper.updateSummaryNotifications(

@@ -274,7 +274,6 @@
     <string name="action_create_list">新建列表</string>
     <string name="action_rename_list">重命名列表</string>
     <string name="action_delete_list">刪除列表</string>
-    <string name="action_edit_list">編輯列表</string>
     <string name="hint_search_people_list">搜索已關注的用戶</string>
     <string name="action_add_to_list">添加用戶到列表</string>
     <string name="action_remove_from_list">從列表中移除用戶</string>
@@ -336,9 +335,6 @@
     <string name="conversation_1_recipients">%1$s</string>
     <string name="conversation_2_recipients">%1$s 和 %2$s</string>
     <string name="conversation_more_recipients">%1$s, %2$s 和 %3$d 等人</string>
-    <plurals name="max_tab_number_reached">
-        <item quantity="other">標籤頁不能超過 %1$d 個</item>
-    </plurals>
     <string name="description_post_media">
         媒體: %s
     </string>

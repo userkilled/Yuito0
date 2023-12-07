@@ -189,7 +189,6 @@
 \n
 \nअधिकमत्र प्राप्यते <a href="https://joinmastodon.org">joinmastodon.org</a>. </string>
     <string name="hint_search_people_list">येषामुसरणं करोषि तेष्वन्विष्यताम्</string>
-    <string name="action_edit_list">सूचिः सम्पाद्यताम्</string>
     <string name="action_delete_list">सूचिर्नश्यताम्</string>
     <string name="action_rename_list">पुनः सूचिनामकरणं क्रियताम्</string>
     <string name="action_create_list">सूचिः निर्मीयताम्</string>
@@ -379,7 +378,6 @@
     <string name="duration_5_min">५ निमेषाः</string>
     <string name="create_poll_title">मतपेटिका</string>
     <string name="pref_title_enable_swipe_for_tabs">सारणहावभावस्य संयुतनं पीठिकापरिवर्तनार्थं कार्यम्</string>
-    <string name="pref_title_show_notifications_filter">सूचनाशोधकं दृश्यताम्</string>
     <string name="failed_search">अन्वेषणे विफलता जाता</string>
     <string name="title_accounts">व्यक्तित्वविवरणलेखाः</string>
     <string name="report_description_remote_instance">अन्यजालवितारकादियं व्यक्तित्वविवरणलेखा । आवेदनस्य रक्षितप्रतिलिपिरपि प्रेष्यतां वा \?</string>
@@ -446,9 +444,6 @@
     <string name="description_post_media_no_description_placeholder">विवरणं नास्ति</string>
     <string name="description_post_cw">विषयपूर्वसतर्कता: %s</string>
     <string name="description_post_media">सामग्र्यः %s</string>
-    <plurals name="max_tab_number_reached">
-        <item quantity="other">अधिकतमपीठिकासङ्ख्या %1$d भूता</item>
-    </plurals>
     <string name="conversation_more_recipients">%1$s, %2$s तथा %3$d अन्येऽपि</string>
     <string name="conversation_2_recipients">%1$s तथैव %2$s</string>
     <string name="title_favourited_by">निम्नमित्रस्य प्रीतिः</string>
@@ -481,7 +476,6 @@
     <string name="duration_365_days">३६५ दिनानि</string>
     <string name="duration_no_change">(परिवर्तनं नास्ति)</string>
     <string name="review_notifications">सूचनाः सम्दृश्यन्ताम्</string>
-    <string name="url_domain_notifier">%s (🔗 %s)</string>
     <string name="pref_show_self_username_never">न कदापि</string>
     <string name="pref_default_post_language">पूर्वनिविष्टा प्रकाशका भाषा</string>
     <string name="notification_report_name">आवेदनानि</string>

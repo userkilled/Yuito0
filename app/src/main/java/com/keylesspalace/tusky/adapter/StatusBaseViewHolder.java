@@ -58,6 +58,7 @@ import com.keylesspalace.tusky.interfaces.StatusActionListener;
 import com.keylesspalace.tusky.util.AbsoluteTimeFormatter;
 import com.keylesspalace.tusky.util.AttachmentHelper;
 import com.keylesspalace.tusky.util.CardViewMode;
+import com.keylesspalace.tusky.util.CompositeWithOpaqueBackground;
 import com.keylesspalace.tusky.util.CustomEmojiHelper;
 import com.keylesspalace.tusky.util.ImageLoadingHelper;
 import com.keylesspalace.tusky.util.LinkHelper;
@@ -73,6 +74,7 @@ import com.keylesspalace.tusky.viewdata.PollViewDataKt;
 import com.keylesspalace.tusky.viewdata.StatusViewData;
 
 import java.text.NumberFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -125,10 +127,10 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
     private final TextView cardDescription;
     private final TextView cardUrl;
     private final PollAdapter pollAdapter;
-    protected LinearLayout filteredPlaceholder;
-    protected TextView filteredPlaceholderLabel;
-    protected Button filteredPlaceholderShowButton;
-    protected ConstraintLayout statusContainer;
+    protected final LinearLayout filteredPlaceholder;
+    protected final TextView filteredPlaceholderLabel;
+    protected final Button filteredPlaceholderShowButton;
+    protected final ConstraintLayout statusContainer;
 
     private final NumberFormat numberFormat = NumberFormat.getNumberInstance();
     private final AbsoluteTimeFormatter absoluteTimeFormatter = new AbsoluteTimeFormatter();
@@ -139,7 +141,7 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
 
     private final Drawable mediaPreviewUnloaded;
 
-    protected StatusBaseViewHolder(View itemView) {
+    protected StatusBaseViewHolder(@NonNull View itemView) {
         super(itemView);
         displayName = itemView.findViewById(R.id.status_display_name);
         username = itemView.findViewById(R.id.status_username);
@@ -203,14 +205,14 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
         TouchDelegateHelper.expandTouchSizeToFillRow((ViewGroup) itemView, CollectionsKt.listOfNotNull(replyButton, reblogButton, favouriteButton, bookmarkButton, moreButton));
     }
 
-    protected void setDisplayName(String name, List<Emoji> customEmojis, StatusDisplayOptions statusDisplayOptions) {
+    protected void setDisplayName(@NonNull String name, @Nullable List<Emoji> customEmojis, @NonNull StatusDisplayOptions statusDisplayOptions) {
         CharSequence emojifiedName = CustomEmojiHelper.emojify(
                 name, customEmojis, displayName, statusDisplayOptions.animateEmojis()
         );
         displayName.setText(emojifiedName);
     }
 
-    protected void setUsername(String name) {
+    protected void setUsername(@Nullable String name) {
         Context context = username.getContext();
         String usernameText = context.getString(R.string.post_username_format, name);
         username.setText(usernameText);
@@ -222,10 +224,10 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
 
     protected void setSpoilerAndContent(@NonNull StatusViewData.Concrete status,
                                         @NonNull StatusDisplayOptions statusDisplayOptions,
-                                        final StatusActionListener listener) {
+                                        final @NonNull StatusActionListener listener) {
 
         Status actionable = status.getActionable();
-        String spoilerText = status.getSpoilerText();
+        String spoilerText = actionable.getSpoilerText();
         List<Emoji> emojis = actionable.getEmojis();
 
         boolean sensitive = !TextUtils.isEmpty(spoilerText);
@@ -342,17 +344,17 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
             avatarInset.setVisibility(View.VISIBLE);
             avatarInset.setBackground(null);
             ImageLoadingHelper.loadAvatar(rebloggedUrl, avatarInset, avatarRadius24dp,
-                    statusDisplayOptions.animateAvatars());
+                    statusDisplayOptions.animateAvatars(), null);
 
             avatarRadius = avatarRadius36dp;
         }
 
         ImageLoadingHelper.loadAvatar(url, avatar, avatarRadius,
-                statusDisplayOptions.animateAvatars());
-
+            statusDisplayOptions.animateAvatars(),
+            Collections.singletonList(new CompositeWithOpaqueBackground(avatar)));
     }
 
-    protected void setMetaData(StatusViewData.Concrete statusViewData, StatusDisplayOptions statusDisplayOptions, StatusActionListener listener) {
+    protected void setMetaData(@NonNull StatusViewData.Concrete statusViewData, @NonNull StatusDisplayOptions statusDisplayOptions, @NonNull StatusActionListener listener) {
 
         Status status = statusViewData.getActionable();
 
@@ -591,9 +593,9 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
     }
 
     protected void setMediaPreviews(
-            final List<Attachment> attachments,
+            final @NonNull List<Attachment> attachments,
             boolean sensitive,
-            final StatusActionListener listener,
+            final @NonNull StatusActionListener listener,
             boolean showingContent,
             boolean useBlurhash
     ) {
@@ -684,8 +686,8 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
         mediaLabels[index].setText(label);
     }
 
-    protected void setMediaLabel(List<Attachment> attachments, boolean sensitive,
-                                 final StatusActionListener listener, boolean showingContent) {
+    protected void setMediaLabel(@NonNull List<Attachment> attachments, boolean sensitive,
+                                 final @NonNull StatusActionListener listener, boolean showingContent) {
         Context context = itemView.getContext();
         for (int i = 0; i < mediaLabels.length; i++) {
             TextView mediaLabel = mediaLabels[i];
@@ -706,7 +708,7 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    private void setAttachmentClickListener(View view, StatusActionListener listener,
+    private void setAttachmentClickListener(View view, @NonNull StatusActionListener listener,
                                             int index, Attachment attachment, boolean animateTransition) {
         view.setOnClickListener(v -> {
             int position = getBindingAdapterPosition();
@@ -730,11 +732,11 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
         sensitiveMediaShow.setVisibility(View.GONE);
     }
 
-    protected void setupButtons(final StatusActionListener listener,
-                                final String accountId,
-                                final String statusContent,
-                                final boolean isNotestock,
-                                StatusDisplayOptions statusDisplayOptions) {
+    protected void setupButtons(final @NonNull StatusActionListener listener,
+                                final @NonNull String accountId,
+                                final @NonNull String statusContent,
+                                final @NonNull boolean isNotestock,
+                                @NonNull StatusDisplayOptions statusDisplayOptions) {
         View.OnClickListener profileButtonClickListener = button -> {
             if (isNotestock) {
                 listener.onViewUrl(accountId, accountId);
@@ -851,6 +853,7 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
             listener.onReblog(!buttonState, position);
             if(!buttonState) {
                 reblogButton.playAnimation();
+                reblogButton.setChecked(true);
             }
             return true;
         });
@@ -872,14 +875,15 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
             listener.onFavourite(!buttonState, position);
             if(!buttonState) {
                 favouriteButton.playAnimation();
+                favouriteButton.setChecked(true);
             }
             return true;
         });
         popup.show();
     }
 
-    public void setupWithStatus(StatusViewData.Concrete status, final StatusActionListener listener,
-                                StatusDisplayOptions statusDisplayOptions) {
+    public void setupWithStatus(@NonNull StatusViewData.Concrete status, final @NonNull StatusActionListener listener,
+                                @NonNull StatusDisplayOptions statusDisplayOptions) {
         this.setupWithStatus(status, listener, statusDisplayOptions, null);
     }
 
@@ -890,7 +894,7 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
         if (payloads == null) {
             Status actionable = status.getActionable();
             setDisplayName(actionable.getAccount().getName(), actionable.getAccount().getEmojis(), statusDisplayOptions);
-            setUsername(status.getUsername());
+            setUsername(actionable.getAccount().getUsername());
             setMetaData(status, statusDisplayOptions, listener);
             setIsReply(actionable.getInReplyToId() != null);
             setReplyCount(actionable.getRepliesCount(), statusDisplayOptions.showStatsInline());
@@ -968,12 +972,10 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
         }
 
         filteredPlaceholderLabel.setText(itemView.getContext().getString(R.string.status_filter_placeholder_label_format, matchedFilter.getTitle()));
-        filteredPlaceholderShowButton.setOnClickListener(view -> {
-            listener.clearWarningAction(getBindingAdapterPosition());
-        });
+        filteredPlaceholderShowButton.setOnClickListener(view -> listener.clearWarningAction(getBindingAdapterPosition()));
     }
 
-    protected static boolean hasPreviewableAttachment(List<Attachment> attachments) {
+    protected static boolean hasPreviewableAttachment(@NonNull List<Attachment> attachments) {
         for (Attachment attachment : attachments) {
             if (attachment.getType() == Attachment.Type.AUDIO || attachment.getType() == Attachment.Type.UNKNOWN) {
                 return false;
@@ -990,11 +992,11 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
         String description = context.getString(R.string.description_status,
                 actionable.getAccount().getName(),
                 getContentWarningDescription(context, status),
-                (TextUtils.isEmpty(status.getSpoilerText()) || !actionable.getSensitive() || status.isExpanded() ? status.getContent() : ""),
+                (TextUtils.isEmpty(actionable.getSpoilerText()) || !actionable.getSensitive() || status.isExpanded() ? status.getContent() : ""),
                 getCreatedAtDescription(actionable.getCreatedAt(), statusDisplayOptions),
                 actionable.getEditedAt() != null ? context.getString(R.string.description_post_edited) : "",
                 getReblogDescription(context, status),
-                status.getUsername(),
+                actionable.getAccount().getUsername(),
                 actionable.getReblogged() ? context.getString(R.string.description_post_reblogged) : "",
                 actionable.getFavourited() ? context.getString(R.string.description_post_favourited) : "",
                 actionable.getBookmarked() ? context.getString(R.string.description_post_bookmarked) : "",
@@ -1041,14 +1043,15 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
 
     private static CharSequence getContentWarningDescription(Context context,
                                                              @NonNull StatusViewData.Concrete status) {
-        if (!TextUtils.isEmpty(status.getSpoilerText())) {
-            return context.getString(R.string.description_post_cw, status.getSpoilerText());
+        if (!TextUtils.isEmpty(status.getActionable().getSpoilerText())) {
+            return context.getString(R.string.description_post_cw, status.getActionable().getSpoilerText());
         } else {
             return "";
         }
     }
 
-    protected static CharSequence getVisibilityDescription(Context context, Status.Visibility visibility) {
+    @NonNull
+    protected static CharSequence getVisibilityDescription(@NonNull Context context, @Nullable Status.Visibility visibility) {
 
         if (visibility == null) {
             return "";
@@ -1097,7 +1100,8 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    protected CharSequence getFavsText(Context context, int count) {
+    @NonNull
+    protected CharSequence getFavsText(@NonNull Context context, int count) {
         if (count > 0) {
             String countString = numberFormat.format(count);
             return HtmlCompat.fromHtml(context.getResources().getQuantityString(R.plurals.favs, count, countString), HtmlCompat.FROM_HTML_MODE_LEGACY);
@@ -1106,7 +1110,8 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    protected CharSequence getReblogsText(Context context, int count) {
+    @NonNull
+    protected CharSequence getReblogsText(@NonNull Context context, int count) {
         if (count > 0) {
             String countString = numberFormat.format(count);
             return HtmlCompat.fromHtml(context.getResources().getQuantityString(R.plurals.reblogs, count, countString), HtmlCompat.FROM_HTML_MODE_LEGACY);
@@ -1207,11 +1212,11 @@ public abstract class StatusBaseViewHolder extends RecyclerView.ViewHolder {
     }
 
     protected void setupCard(
-            final StatusViewData.Concrete status,
+            final @NonNull StatusViewData.Concrete status,
             boolean expanded,
-            final CardViewMode cardViewMode,
-            final StatusDisplayOptions statusDisplayOptions,
-            final StatusActionListener listener
+            final @NonNull CardViewMode cardViewMode,
+            final @NonNull StatusDisplayOptions statusDisplayOptions,
+            final @NonNull StatusActionListener listener
     ) {
         if (cardView == null) {
             return;

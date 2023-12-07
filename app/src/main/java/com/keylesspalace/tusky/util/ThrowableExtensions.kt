@@ -30,9 +30,9 @@ fun Throwable.getServerErrorMessage(): String? {
 
 /** @return A drawable resource to accompany the error message for this throwable */
 fun Throwable.getDrawableRes(): Int = when (this) {
-    is IOException -> R.drawable.elephant_offline
-    is HttpException -> R.drawable.elephant_offline
-    else -> R.drawable.elephant_error
+    is IOException -> R.drawable.errorphant_offline
+    is HttpException -> R.drawable.errorphant_offline
+    else -> R.drawable.errorphant_error
 }
 
 /** @return A string error message for this throwable */
@@ -40,3 +40,5 @@ fun Throwable.getErrorString(context: Context): String = getServerErrorMessage()
     is IOException -> context.getString(R.string.error_network)
     else -> context.getString(R.string.error_generic)
 }
+
+fun Throwable.isHttpNotFound(): Boolean = (this as? HttpException)?.code() == 404

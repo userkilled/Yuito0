@@ -33,6 +33,8 @@
  * see <http://www.gnu.org/licenses>. */
 package com.keylesspalace.tusky.util
 
+import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
 import com.keylesspalace.tusky.entity.Notification
 import com.keylesspalace.tusky.entity.Status
 import com.keylesspalace.tusky.entity.TrendingTag
@@ -55,12 +57,13 @@ fun Status.toViewData(
     )
 }
 
+@JvmName("notificationToViewData")
 fun Notification.toViewData(
     isShowingContent: Boolean,
     isExpanded: Boolean,
     isCollapsed: Boolean
-): NotificationViewData {
-    return NotificationViewData(
+): NotificationViewData.Concrete {
+    return NotificationViewData.Concrete(
         this.type,
         this.id,
         this.account,
@@ -85,4 +88,8 @@ fun List<TrendingTag>.toViewData(): List<TrendingViewData.Tag> {
             maxTrendingValue = maxTrendingValue
         )
     }
+}
+
+fun CombinedLoadStates.isAnyLoading(): Boolean {
+    return this.refresh == LoadState.Loading || this.append == LoadState.Loading || this.prepend == LoadState.Loading
 }

@@ -22,11 +22,14 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.QuoteSpan
 import android.text.style.URLSpan
 import android.util.Log
 import android.view.MotionEvent
@@ -34,15 +37,19 @@ import android.view.MotionEvent.ACTION_UP
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
+import androidx.core.text.getSpans
 import androidx.preference.PreferenceManager
+import at.connyduck.sparkbutton.helpers.Utils
 import com.google.android.material.color.MaterialColors
 import com.keylesspalace.tusky.R
 import com.keylesspalace.tusky.entity.HashTag
 import com.keylesspalace.tusky.entity.Status.Mention
 import com.keylesspalace.tusky.interfaces.LinkListener
+import java.lang.ref.WeakReference
 import java.net.URI
 import java.net.URISyntaxException
 
@@ -65,18 +72,19 @@ fun getDomain(urlString: String?): String {
  * @param listener to notify about particular spans that are clicked
  */
 fun setClickableText(view: TextView, content: CharSequence, mentions: List<Mention>, tags: List<HashTag>?, listener: LinkListener) {
-    val spannableContent = markupHiddenUrls(view.context, content)
+    val spannableContent = markupHiddenUrls(view, content)
 
     view.text = spannableContent.apply {
-        getSpans(0, content.length, URLSpan::class.java).forEach {
-            setClickableText(it, this, mentions, tags, listener)
+        styleQuoteSpans(view)
+        getSpans(0, spannableContent.length, URLSpan::class.java).forEach { span ->
+            setClickableText(span, this, mentions, tags, listener)
         }
     }
     view.movementMethod = NoTrailingSpaceLinkMovementMethod.getInstance()
 }
 
 @VisibleForTesting
-fun markupHiddenUrls(context: Context, content: CharSequence): SpannableStringBuilder {
+fun markupHiddenUrls(view: TextView, content: CharSequence): SpannableStringBuilder {
     val spannableContent = SpannableStringBuilder(content)
     val originalSpans = spannableContent.getSpans(0, content.length, URLSpan::class.java)
     val obscuredLinkSpans = originalSpans.filter {
@@ -99,8 +107,22 @@ fun markupHiddenUrls(context: Context, content: CharSequence): SpannableStringBu
         val start = spannableContent.getSpanStart(span)
         val end = spannableContent.getSpanEnd(span)
         val originalText = spannableContent.subSequence(start, end)
-        val replacementText = context.getString(R.string.url_domain_notifier, originalText, getDomain(span.url))
+        val replacementText = view.context.getString(R.string.url_domain_notifier, originalText, getDomain(span.url))
         spannableContent.replace(start, end, replacementText) // this also updates the span locations
+
+        val linkDrawable = AppCompatResources.getDrawable(view.context, R.drawable.ic_link)!!
+        // ImageSpan does not always align the icon correctly in the line, let's use our custom emoji span for this
+        val linkDrawableSpan = EmojiSpan(WeakReference(view))
+        linkDrawableSpan.imageDrawable = linkDrawable
+
+        val placeholderIndex = replacementText.indexOf("🔗")
+
+        spannableContent.setSpan(
+            linkDrawableSpan,
+            start + placeholderIndex,
+            start + placeholderIndex + "🔗".length,
+            0
+        )
     }
 
     return spannableContent
@@ -158,6 +180,32 @@ private fun getCustomSpanForMention(mentions: List<Mention>, span: URLSpan, list
 private fun getCustomSpanForMentionUrl(url: String, mentionId: String, listener: LinkListener): ClickableSpan {
     return object : MentionSpan(url) {
         override fun onClick(view: View) = listener.onViewAccount(mentionId)
+    }
+}
+
+private fun SpannableStringBuilder.styleQuoteSpans(view: TextView) {
+    getSpans(0, length, QuoteSpan::class.java).forEach { span ->
+        val start = getSpanStart(span)
+        val end = getSpanEnd(span)
+        val flags = getSpanFlags(span)
+
+        val quoteColor = MaterialColors.getColor(view, android.R.attr.textColorTertiary)
+
+        val newQuoteSpan = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            QuoteSpan(
+                quoteColor,
+                Utils.dpToPx(view.context, 3),
+                Utils.dpToPx(view.context, 8)
+            )
+        } else {
+            QuoteSpan(quoteColor)
+        }
+
+        val quoteColorSpan = ForegroundColorSpan(quoteColor)
+
+        removeSpan(span)
+        setSpan(newQuoteSpan, start, end, flags)
+        setSpan(quoteColorSpan, start, end, flags)
     }
 }
 
@@ -284,6 +332,8 @@ fun openLinkInCustomTab(uri: Uri, context: Context) {
 // https://gts.foo.bar/@goblin/statuses/01GH9XANCJ0TA8Y95VE9H3Y0Q2
 // https://gts.foo.bar/@goblin
 // https://foo.microblog.pub/o/5b64045effd24f48a27d7059f6cb38f5
+// https://bookwyrm.foo.bar/user/User
+// https://bookwyrm.foo.bar/user/User/comment/123456
 fun looksLikeMastodonUrl(urlString: String): Boolean {
     val uri: URI
     try {
@@ -304,6 +354,8 @@ fun looksLikeMastodonUrl(urlString: String): Boolean {
             it.matches("^/@[^/]+/\\d+$".toRegex()) ||
             it.matches("^/users/[^/]+/statuses/\\d+$".toRegex()) ||
             it.matches("^/users/\\w+$".toRegex()) ||
+            it.matches("^/user/[^/]+/comment/\\d+$".toRegex()) ||
+            it.matches("^/user/\\w+$".toRegex()) ||
             it.matches("^/notice/[a-zA-Z0-9]+$".toRegex()) ||
             it.matches("^/objects/[-a-f0-9]+$".toRegex()) ||
             it.matches("^/notes/[a-z0-9]+$".toRegex()) ||

@@ -341,7 +341,6 @@
     <string name="action_create_list">Zerrenda sortu</string>
     <string name="action_rename_list">Zerrenda berrizendatu</string>
     <string name="action_delete_list">Ezabatu zerrenda</string>
-    <string name="action_edit_list">Editatu zerrenda</string>
     <string name="hint_search_people_list">Bilatu jarraitzen dituzun pertsonak</string>
     <string name="action_add_to_list">Gehitu kontua zerrendan</string>
     <string name="action_remove_from_list">Kendu kontua zerrendatik</string>
@@ -361,10 +360,6 @@
     <string name="conversation_1_recipients">%1$s</string>
     <string name="conversation_2_recipients">%1$s eta %2$s</string>
     <string name="conversation_more_recipients">%1$s, %2$s eta %3$d gehiago</string>
-    <plurals name="max_tab_number_reached">
-        <item quantity="one">gehienezko %1$d fitxa iritsita</item>
-        <item quantity="other">gehienezko %1$d fitxa iritsita</item>
-    </plurals>
     <string name="description_post_media">Media: %s</string>
     <string name="description_post_cw">Edukiarekiko abisua: %s</string>
     <string name="description_post_media_no_description_placeholder">Deskribapenik ez</string>
@@ -418,7 +413,6 @@
     <string name="report_description_remote_instance">Kontua beste zerbitzari batekoa da. Bidali txostenaren kopia anonimatua hara ere\?</string>
     <string name="title_accounts">Kontuak</string>
     <string name="failed_search">Bilaketa huts egin du</string>
-    <string name="pref_title_show_notifications_filter">Erakutsi jakinarazpenen iragazkia</string>
     <string name="create_poll_title">Inkesta</string>
     <string name="duration_5_min">5 minutu</string>
     <string name="duration_30_min">30 minutu</string>

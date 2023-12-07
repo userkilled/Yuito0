@@ -37,7 +37,7 @@ data class Account(
     val emojis: List<Emoji>? = emptyList(), // nullable for backward compatibility
     val fields: List<Field>? = emptyList(), // nullable for backward compatibility
     val moved: Account? = null,
-
+    val roles: List<Role>? = emptyList()
 ) {
 
     val name: String
@@ -74,4 +74,9 @@ data class Field(
 data class StringField(
     val name: String,
     val value: String
+)
+
+data class Role(
+    val name: String,
+    val color: String
 )

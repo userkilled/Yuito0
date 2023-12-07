@@ -27,7 +27,7 @@ android {
     defaultConfig {
         applicationId APP_ID
         namespace "com.keylesspalace.tusky"
-        minSdk 23
+        minSdk 24
         targetSdk 33
         versionCode 56
         versionName '4.6.0'
@@ -68,8 +68,7 @@ android {
 
     lint {
         lintConfig file("lint.xml")
-        // Regenerate by deleting app/lint-baseline.xml, then run:
-        //   ./gradlew lintBlueDebug
+        // Regenerate by running `./gradlew app:newLintBaseline`
         baseline = file("lint-baseline.xml")
     }
 
@@ -107,12 +106,6 @@ android {
     dependenciesInfo {
         includeInApk false
         includeInBundle false
-    }
-    // Can remove this once https://issuetracker.google.com/issues/260059413 is fixed.
-    // https://kotlinlang.org/docs/gradle-configure-project.html#gradle-java-toolchains-support
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
     }
     applicationVariants.configureEach { variant ->
         variant.outputs.configureEach {
@@ -166,7 +159,7 @@ dependencies {
 
     implementation libs.sparkbutton
 
-    implementation libs.photoview
+    implementation libs.touchimageview
 
     implementation libs.bundles.material.drawer
     implementation libs.material.typeface
@@ -196,4 +189,21 @@ dependencies {
 
     implementation libs.accelfeaster
     implementation libs.jsoup
+}
+
+// Work around warnings of:
+// WARNING: Illegal reflective access by org.jetbrains.kotlin.kapt3.util.ModuleManipulationUtilsKt (file:/C:/Users/Andi/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-annotation-processing-gradle/1.8.22/28dab7e0ee9ce62c03bf97de3543c911dc653700/kotlin-annotation-processing-gradle-1.8.22.jar) to constructor com.sun.tools.javac.util.Context()
+// See https://youtrack.jetbrains.com/issue/KT-30589/Kapt-An-illegal-reflective-access-operation-has-occurred
+tasks.withType(org.jetbrains.kotlin.gradle.internal.KaptWithoutKotlincTask).configureEach {
+    kaptProcessJvmArgs.addAll([
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.jvm=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+        "--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED"])
 }

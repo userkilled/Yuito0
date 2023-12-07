@@ -275,7 +275,6 @@
     <string name="action_create_list">Krei liston</string>
     <string name="action_rename_list">Ŝanĝi la nomon de la listo</string>
     <string name="action_delete_list">Forigi la liston</string>
-    <string name="action_edit_list">Redakti la liston</string>
     <string name="hint_search_people_list">Serĉi homojn, kiujn vi sekvas</string>
     <string name="action_add_to_list">Aldoni konton al la listo</string>
     <string name="action_remove_from_list">Forigi konton el la listo</string>
@@ -340,10 +339,6 @@
     <string name="conversation_1_recipients">%1$s</string>
     <string name="conversation_2_recipients">%1$s kaj %2$s</string>
     <string name="conversation_more_recipients">%1$s, %2$s kaj %3$d aliaj</string>
-    <plurals name="max_tab_number_reached">
-        <item quantity="one">maksimumo da %1$d langeto atingita</item>
-        <item quantity="other">maksimumo da %1$d langetoj atingita</item>
-    </plurals>
     <string name="description_post_media">        Aŭdovidaĵo: %s
     </string>
     <string name="description_post_cw">        Enhava averto: %s
@@ -404,7 +399,6 @@
     <string name="failed_fetch_posts">Venigo de statusoj malsukcesis</string>
     <string name="report_description_1">La signalo estos sendita al la kontrolantoj de via servilo. Vi povas doni klarigon pri kial vi signalas ĉi tiun konton sube:</string>
     <string name="report_description_remote_instance">La konto estas en alia servilo. Ĉu sendi sennomigitan kopion de la signalo ankaŭ tien\?</string>
-    <string name="pref_title_show_notifications_filter">Montri filtrilon de sciigoj</string>
     <string name="filter_dialog_whole_word">Tuta vorto</string>
     <string name="filter_dialog_whole_word_description">Ŝlosilvorto aŭ frazo litercifera aplikiĝos, nur se ĝi kongruas kun la tuta vorto</string>
     <string name="title_accounts">Kontoj</string>
@@ -563,5 +557,4 @@
     <string name="description_post_language">Mesaĝolingvo</string>
     <string name="dialog_push_notification_migration">Por ricevi sciigoj per UnifiedPush, Yuito bezonas taŭgan permeson el Mastodon-servilo. Tio postulas re-ensaluton por ŝanĝi OAuth-rajtoj donitaj al Yuito. Se vi uzas la opcion re-ensaluti ĉi tie aŭ en la agordoj de la konto, viaj malnetoj kaj kaŝmemoroj estos konservitaj.</string>
     <string name="dialog_push_notification_migration_other_accounts">Vi re-ensalutis en tiu konto por doni sciigo-permeson al Yuito. Vi havas tamen aliajn kontojn, ĉe kiuj vi devas re-sensaluti. Iru al ili, kaj re-ensalutu por ebligi ricevon de sciigoj per UnifiedPush.</string>
-    <string name="url_domain_notifier">%s (🔗 %s)</string>
 </resources>

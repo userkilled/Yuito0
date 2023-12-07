@@ -26,6 +26,7 @@ import androidx.lifecycle.Lifecycle
 import autodispose2.androidx.lifecycle.AndroidLifecycleScopeProvider
 import autodispose2.autoDispose
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.keylesspalace.tusky.BaseActivity
 import com.keylesspalace.tusky.components.account.AccountActivity
 import com.keylesspalace.tusky.components.viewthread.ViewThreadActivity
 import com.keylesspalace.tusky.network.MastodonApi
@@ -94,7 +95,7 @@ abstract class BottomSheetActivity : BaseActivity() {
                         viewThread(statuses[0].id, statuses[0].url)
                         return@subscribe
                     }
-                    accounts.firstOrNull { it.url == url }?.let { account ->
+                    accounts.firstOrNull { it.url.equals(url, ignoreCase = true) }?.let { account ->
                         // Some servers return (unrelated) accounts for url searches (#2804)
                         // Verify that the account's url matches the query
                         viewAccount(account.id)

@@ -15,6 +15,7 @@
 
 package com.keylesspalace.tusky.components.announcements
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.text.SpannableStringBuilder
 import android.view.ContextThemeWrapper
@@ -29,6 +30,7 @@ import com.keylesspalace.tusky.R
 import com.keylesspalace.tusky.databinding.ItemAnnouncementBinding
 import com.keylesspalace.tusky.entity.Announcement
 import com.keylesspalace.tusky.interfaces.LinkListener
+import com.keylesspalace.tusky.util.AbsoluteTimeFormatter
 import com.keylesspalace.tusky.util.BindingHolder
 import com.keylesspalace.tusky.util.EmojiSpan
 import com.keylesspalace.tusky.util.emojify
@@ -50,13 +52,18 @@ class AnnouncementAdapter(
     private val animateEmojis: Boolean = false
 ) : RecyclerView.Adapter<BindingHolder<ItemAnnouncementBinding>>() {
 
+    private val absoluteTimeFormatter = AbsoluteTimeFormatter()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingHolder<ItemAnnouncementBinding> {
         val binding = ItemAnnouncementBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return BindingHolder(binding)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: BindingHolder<ItemAnnouncementBinding>, position: Int) {
         val item = items[position]
+
+        holder.binding.announcementDate.text = absoluteTimeFormatter.format(item.publishedAt, false)
 
         val text = holder.binding.text
         val chips = holder.binding.chipGroup

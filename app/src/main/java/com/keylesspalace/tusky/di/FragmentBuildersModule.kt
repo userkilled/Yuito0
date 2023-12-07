@@ -20,8 +20,7 @@ import com.keylesspalace.tusky.components.account.list.ListsForAccountFragment
 import com.keylesspalace.tusky.components.account.media.AccountMediaFragment
 import com.keylesspalace.tusky.components.accountlist.AccountListFragment
 import com.keylesspalace.tusky.components.conversation.ConversationsFragment
-import com.keylesspalace.tusky.components.instancemute.fragment.InstanceListFragment
-import com.keylesspalace.tusky.components.notifications.NotificationsFragment
+import com.keylesspalace.tusky.components.domainblocks.DomainBlocksFragment
 import com.keylesspalace.tusky.components.preference.AccountPreferencesFragment
 import com.keylesspalace.tusky.components.preference.NotificationPreferencesFragment
 import com.keylesspalace.tusky.components.preference.PreferencesFragment
@@ -33,15 +32,13 @@ import com.keylesspalace.tusky.components.search.fragments.SearchHashtagsFragmen
 import com.keylesspalace.tusky.components.search.fragments.SearchNotestockFragment
 import com.keylesspalace.tusky.components.search.fragments.SearchStatusesFragment
 import com.keylesspalace.tusky.components.timeline.TimelineFragment
-import com.keylesspalace.tusky.components.trending.TrendingFragment
+import com.keylesspalace.tusky.components.trending.TrendingTagsFragment
 import com.keylesspalace.tusky.components.viewthread.ViewThreadFragment
 import com.keylesspalace.tusky.components.viewthread.edits.ViewEditsFragment
+import com.keylesspalace.tusky.fragment.NotificationsFragment
+import com.keylesspalace.tusky.fragment.ViewVideoFragment
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-
-/**
- * Created by charlag on 3/24/18.
- */
 
 @Module
 abstract class FragmentBuildersModule {
@@ -85,7 +82,7 @@ abstract class FragmentBuildersModule {
     abstract fun reportDoneFragment(): ReportDoneFragment
 
     @ContributesAndroidInjector
-    abstract fun instanceListFragment(): InstanceListFragment
+    abstract fun instanceListFragment(): DomainBlocksFragment
 
     @ContributesAndroidInjector
     abstract fun searchStatusesFragment(): SearchStatusesFragment
@@ -103,7 +100,10 @@ abstract class FragmentBuildersModule {
     abstract fun listsForAccountFragment(): ListsForAccountFragment
 
     @ContributesAndroidInjector
-    abstract fun trendingFragment(): TrendingFragment
+    abstract fun trendingTagsFragment(): TrendingTagsFragment
+
+    @ContributesAndroidInjector
+    abstract fun viewVideoFragment(): ViewVideoFragment
 
     @ContributesAndroidInjector
     abstract fun searchNotestockFragment(): SearchNotestockFragment

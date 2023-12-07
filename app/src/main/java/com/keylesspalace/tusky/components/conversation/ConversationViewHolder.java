@@ -78,7 +78,7 @@ public class ConversationViewHolder extends StatusBaseViewHolder {
         if (payloads == null) {
             TimelineAccount account = status.getAccount();
 
-            setupCollapsedState(statusViewData.isCollapsible(), statusViewData.isCollapsed(), statusViewData.isExpanded(), statusViewData.getSpoilerText(), listener);
+            setupCollapsedState(statusViewData.isCollapsible(), statusViewData.isCollapsed(), statusViewData.isExpanded(), status.getSpoilerText(), listener);
 
             setDisplayName(account.getDisplayName(), account.getEmojis(), statusDisplayOptions);
             setUsername(account.getUsername());
@@ -144,7 +144,7 @@ public class ConversationViewHolder extends StatusBaseViewHolder {
             ImageView avatarView = avatars[i];
             if (i < accounts.size()) {
                 ImageLoadingHelper.loadAvatar(accounts.get(i).getAvatar(), avatarView,
-                        avatarRadius48dp, statusDisplayOptions.animateAvatars());
+                        avatarRadius48dp, statusDisplayOptions.animateAvatars(), null);
                 avatarView.setVisibility(View.VISIBLE);
             } else {
                 avatarView.setVisibility(View.GONE);

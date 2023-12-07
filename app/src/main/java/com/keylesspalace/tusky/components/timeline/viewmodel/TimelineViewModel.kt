@@ -24,16 +24,14 @@ import at.connyduck.calladapter.networkresult.fold
 import at.connyduck.calladapter.networkresult.getOrElse
 import at.connyduck.calladapter.networkresult.getOrThrow
 import com.keylesspalace.tusky.appstore.BlockEvent
-import com.keylesspalace.tusky.appstore.BookmarkEvent
 import com.keylesspalace.tusky.appstore.DomainMuteEvent
 import com.keylesspalace.tusky.appstore.Event
 import com.keylesspalace.tusky.appstore.EventHub
-import com.keylesspalace.tusky.appstore.FavoriteEvent
+import com.keylesspalace.tusky.appstore.FilterUpdatedEvent
 import com.keylesspalace.tusky.appstore.MuteConversationEvent
 import com.keylesspalace.tusky.appstore.MuteEvent
-import com.keylesspalace.tusky.appstore.PinEvent
 import com.keylesspalace.tusky.appstore.PreferenceChangedEvent
-import com.keylesspalace.tusky.appstore.ReblogEvent
+import com.keylesspalace.tusky.appstore.StatusChangedEvent
 import com.keylesspalace.tusky.appstore.StatusDeletedEvent
 import com.keylesspalace.tusky.appstore.StreamUpdateEvent
 import com.keylesspalace.tusky.appstore.UnfollowEvent
@@ -48,13 +46,13 @@ import com.keylesspalace.tusky.network.FilterModel
 import com.keylesspalace.tusky.network.MastodonApi
 import com.keylesspalace.tusky.settings.PrefKeys
 import com.keylesspalace.tusky.usecase.TimelineCases
+import com.keylesspalace.tusky.util.isHttpNotFound
 import com.keylesspalace.tusky.viewdata.StatusViewData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import net.accelf.yuito.streaming.StreamType
 import net.accelf.yuito.streaming.Subscription
-import retrofit2.HttpException
 
 abstract class TimelineViewModel(
     private val timelineCases: TimelineCases,
@@ -79,6 +77,7 @@ abstract class TimelineViewModel(
     private var alwaysOpenSpoilers = false
     private var filterRemoveReplies = false
     private var filterRemoveReblogs = false
+    private var filterRemoveSelfReblogs = false
     protected var readingOrder: ReadingOrder = ReadingOrder.OLDEST_FIRST
 
     val shouldReplyInQuick by lazy {
@@ -89,6 +88,7 @@ abstract class TimelineViewModel(
             Kind.TAG,
             Kind.FAVOURITES,
             Kind.LIST,
+            Kind.PUBLIC_TRENDING_STATUSES,
             -> true
             Kind.BOOKMARKS,
             Kind.USER,
@@ -111,6 +111,7 @@ abstract class TimelineViewModel(
             Kind.USER_WITH_REPLIES,
             Kind.FAVOURITES,
             Kind.BOOKMARKS,
+            Kind.PUBLIC_TRENDING_STATUSES,
             -> {
                 throw NotImplementedError("streaming not implemented for this type")
             }
@@ -135,6 +136,8 @@ abstract class TimelineViewModel(
                 !sharedPreferences.getBoolean(PrefKeys.TAB_FILTER_HOME_REPLIES, true)
             filterRemoveReblogs =
                 !sharedPreferences.getBoolean(PrefKeys.TAB_FILTER_HOME_BOOSTS, true)
+            filterRemoveSelfReblogs =
+                !sharedPreferences.getBoolean(PrefKeys.TAB_SHOW_HOME_SELF_BOOSTS, true)
         }
         readingOrder = ReadingOrder.from(sharedPreferences.getString(PrefKeys.READING_ORDER, null))
 
@@ -213,13 +216,7 @@ abstract class TimelineViewModel(
 
     abstract fun loadMore(placeholderId: String)
 
-    abstract fun handleReblogEvent(reblogEvent: ReblogEvent)
-
-    abstract fun handleFavEvent(favEvent: FavoriteEvent)
-
-    abstract fun handleBookmarkEvent(bookmarkEvent: BookmarkEvent)
-
-    abstract fun handlePinEvent(pinEvent: PinEvent)
+    abstract fun handleStatusChangedEvent(status: Status)
 
     abstract fun handleStreamUpdateEvent(status: Status, streamId: Int)
 
@@ -237,7 +234,8 @@ abstract class TimelineViewModel(
         val status = statusViewData.asStatusOrNull()?.status ?: return Filter.Action.NONE
         return if (
             (status.inReplyToId != null && filterRemoveReplies) ||
-            (status.reblog != null && filterRemoveReblogs)
+            (status.reblog != null && filterRemoveReblogs) ||
+            ((status.account.id == status.reblog?.account?.id) && filterRemoveSelfReblogs)
         ) {
             return Filter.Action.HIDE
         } else {
@@ -264,6 +262,14 @@ abstract class TimelineViewModel(
                     fullReload()
                 }
             }
+            PrefKeys.TAB_SHOW_HOME_SELF_BOOSTS -> {
+                val filter = sharedPreferences.getBoolean(PrefKeys.TAB_SHOW_HOME_SELF_BOOSTS, true)
+                val oldRemoveSelfReblogs = filterRemoveSelfReblogs
+                filterRemoveSelfReblogs = kind == Kind.HOME && !filter
+                if (oldRemoveSelfReblogs != filterRemoveSelfReblogs) {
+                    fullReload()
+                }
+            }
             FilterV1.HOME, FilterV1.NOTIFICATIONS, FilterV1.THREAD, FilterV1.PUBLIC, FilterV1.ACCOUNT -> {
                 if (filterContextMatchesKind(kind, listOf(key))) {
                     reloadFilters()
@@ -282,10 +288,6 @@ abstract class TimelineViewModel(
 
     private fun handleEvent(event: Event) {
         when (event) {
-            is FavoriteEvent -> handleFavEvent(event)
-            is ReblogEvent -> handleReblogEvent(event)
-            is BookmarkEvent -> handleBookmarkEvent(event)
-            is PinEvent -> handlePinEvent(event)
             is StreamUpdateEvent -> {
                 if (isStreamingEnabled && event.subscription == subscription) {
                     handleStreamUpdateEvent(event.status, event.streamId)
@@ -324,6 +326,11 @@ abstract class TimelineViewModel(
             is PreferenceChangedEvent -> {
                 onPreferenceChanged(event.preferenceKey)
             }
+            is FilterUpdatedEvent -> {
+                if (filterContextMatchesKind(kind, event.filterContext)) {
+                    fullReload()
+                }
+            }
         }
     }
 
@@ -336,7 +343,7 @@ abstract class TimelineViewModel(
                     invalidate()
                 },
                 { throwable ->
-                    if (throwable is HttpException && throwable.code() == 404) {
+                    if (throwable.isHttpNotFound()) {
                         // Fallback to client-side filter code
                         val filters = api.getFiltersV1().getOrElse {
                             Log.e(TAG, "Failed to fetch filters", it)
@@ -371,12 +378,12 @@ abstract class TimelineViewModel(
     }
 
     enum class Kind {
-        HOME, PUBLIC_LOCAL, PUBLIC_FEDERATED, TAG, USER, USER_PINNED, USER_WITH_REPLIES, FAVOURITES, LIST, BOOKMARKS;
+        HOME, PUBLIC_LOCAL, PUBLIC_FEDERATED, TAG, USER, USER_PINNED, USER_WITH_REPLIES, FAVOURITES, LIST, BOOKMARKS, PUBLIC_TRENDING_STATUSES;
 
         fun toFilterKind(): Filter.Kind {
             return when (valueOf(name)) {
                 HOME, LIST -> Filter.Kind.HOME
-                PUBLIC_FEDERATED, PUBLIC_LOCAL, TAG, FAVOURITES -> Filter.Kind.PUBLIC
+                PUBLIC_FEDERATED, PUBLIC_LOCAL, TAG, FAVOURITES, PUBLIC_TRENDING_STATUSES -> Filter.Kind.PUBLIC
                 USER, USER_WITH_REPLIES, USER_PINNED -> Filter.Kind.ACCOUNT
                 else -> Filter.Kind.PUBLIC
             }

@@ -37,7 +37,6 @@ import com.keylesspalace.tusky.service.ServiceClient
 import com.keylesspalace.tusky.service.StatusToSend
 import com.keylesspalace.tusky.util.randomAlphanumericString
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,7 +50,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@OptIn(FlowPreview::class)
 class ComposeViewModel @Inject constructor(
     private val api: MastodonApi,
     private val accountManager: AccountManager,
@@ -106,7 +104,7 @@ class ComposeViewModel @Inject constructor(
 
     val domain = accountManager.activeAccount?.domain!!
 
-    lateinit var composeKind: ComposeKind
+    private lateinit var composeKind: ComposeKind
 
     // Used in ComposeActivity to pass state to result function when cropImage contract inflight
     var cropImageItemOld: QueuedMedia? = null
@@ -288,7 +286,7 @@ class ComposeViewModel @Inject constructor(
         val mediaUris: MutableList<String> = mutableListOf()
         val mediaDescriptions: MutableList<String?> = mutableListOf()
         val mediaFocus: MutableList<Attachment.Focus?> = mutableListOf()
-        media.value.forEach { item ->
+        for (item in media.value) {
             mediaUris.add(item.uri.toString())
             mediaDescriptions.add(item.description)
             mediaFocus.add(item.focus)

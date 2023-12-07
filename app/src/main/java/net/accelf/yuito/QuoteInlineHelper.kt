@@ -106,10 +106,10 @@ class QuoteInlineHelper(
         )
         setAvatar(account.avatar, avatarRadius24dp, statusDisplayOptions)
         setOnClickListener(account.id, actionable.url)
-        if (quote.spoilerText.isEmpty()) {
+        if (quote.status.spoilerText.isEmpty()) {
             hideSpoilerText()
         } else {
-            setSpoilerText(quote.spoilerText, actionable.emojis)
+            setSpoilerText(quote.status.spoilerText, actionable.emojis)
         }
         val viewMedia = binding.statusQuoteInlineMedia
         if (actionable.attachments.size == 0) {

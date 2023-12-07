@@ -81,7 +81,7 @@ class PreferencesFragment : PreferenceFragmentCompat(), Injectable {
 
             preferenceCategory(R.string.pref_title_appearance_settings) {
                 listPreference {
-                    setDefaultValue(AppTheme.NIGHT.value)
+                    setDefaultValue(AppTheme.DEFAULT.value)
                     setEntries(R.array.app_theme_names)
                     entryValues = AppTheme.stringValues()
                     key = PrefKeys.APP_THEME
@@ -211,13 +211,6 @@ class PreferencesFragment : PreferenceFragmentCompat(), Injectable {
                     setDefaultValue(false)
                     key = PrefKeys.SHOW_CARDS_IN_TIMELINES
                     setTitle(R.string.pref_title_show_cards_in_timelines)
-                    isSingleLineTitle = false
-                }
-
-                switchPreference {
-                    setDefaultValue(true)
-                    key = PrefKeys.SHOW_NOTIFICATIONS_FILTER
-                    setTitle(R.string.pref_title_show_notifications_filter)
                     isSingleLineTitle = false
                 }
 

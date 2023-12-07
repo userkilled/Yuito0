@@ -251,7 +251,6 @@
     <string name="action_create_list">Ustvari seznam</string>
     <string name="action_rename_list">Preimenuj seznam</string>
     <string name="action_delete_list">Izbriši seznam</string>
-    <string name="action_edit_list">Uredi seznam</string>
     <string name="hint_search_people_list">Poiščite osebe, katerim sledite</string>
     <string name="action_add_to_list">Dodaj račun na seznam</string>
     <string name="action_remove_from_list">Odstrani račun iz seznama</string>
@@ -313,9 +312,6 @@
     <string name="conversation_1_recipients">%1$s</string>
     <string name="conversation_2_recipients">%1$s in %2$s</string>
     <string name="conversation_more_recipients">%1$s, %2$s in %3$d več</string>
-    <plurals name="max_tab_number_reached">
-        <item quantity="other">doseženih maksimalnih %1$d zavihkov</item>
-    </plurals>
     <string name="description_post_media">Mediji: %s</string>
     <string name="description_post_cw">Opozorila o vsebini: %s</string>
     <string name="description_post_media_no_description_placeholder">Brez opisa</string>
@@ -408,7 +404,6 @@
     <string name="confirmation_domain_unmuted">Domena %s odrita</string>
     <string name="mute_domain_warning">Ali ste prepričani, da želite blokirati vse iz domene %s\? Vsebine iz te domene ne boste videli v nobeni javni časovnici ali v obvestilih. Vaši sledilci iz te domene bodo odstranjeni.</string>
     <string name="mute_domain_warning_dialog_ok">Skrij celotno domeno</string>
-    <string name="pref_title_show_notifications_filter">Pokaži filtre obvestil</string>
     <string name="filter_dialog_whole_word">Cela beseda</string>
     <string name="filter_dialog_whole_word_description">Če je ključna beseda ali fraza samo alfanumerična, bo uporabljena le, če se ujema s celotno besedo</string>
     <string name="title_accounts">Računi</string>

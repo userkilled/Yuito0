@@ -184,8 +184,9 @@
         <item name="materialDrawerDrawCircularShadow">false</item>
     </style>
 
-    <style name="ShapeAppearance.Avatar" parent="ShapeAppearance.MaterialComponents">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">12.5%</item>
+    <!-- Used in exo_player_control_view.xml. Unmodified values are 5dp each -->
+    <style name="TuskyExoPlayerPlayPause" parent="ExoStyledControls.Button.Center.PlayPause">
+        <item name="android:layout_marginLeft">20dp</item>
+        <item name="android:layout_marginRight">20dp</item>
     </style>
 </resources>

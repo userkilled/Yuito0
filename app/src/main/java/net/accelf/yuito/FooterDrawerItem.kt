@@ -40,7 +40,7 @@ class FooterDrawerItem : AbstractDrawerItem<FooterDrawerItem, BindingHolder<Item
     fun setInstance(instance: NetworkResult<Instance>) {
         instance
             .onSuccess {
-                binding.instanceData.text = listOf(it.title, it.uri, it.version).joinToString("\n")
+                binding.instanceData.text = listOf(it.title, it.domain, it.version).joinToString("\n")
             }
             .onFailure {
                 binding.instanceData.text = binding.root.context.getString(R.string.instance_data_failed)
